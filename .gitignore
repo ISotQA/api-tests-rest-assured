@@ -1,0 +1,15 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# Maven
+target/
+*.log
+
+# macOS
+.DS_Store
+
+# Gradle
+.gradle/
+build/
