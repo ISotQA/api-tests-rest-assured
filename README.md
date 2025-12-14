@@ -21,31 +21,40 @@ As a test API, a public mock service is used: https://jsonplaceholder.typicode.c
 
 The project contains API tests for the following resources.
 
-### /posts
-- GET a single post by id
-- GET a list of posts
-- GET a non-existing post (404)
-- POST create a new post (201)
-- POST to an invalid endpoint (404)
-- PUT update a post
-- DELETE a post
+### Covered test scenarios
+
+**/posts**
+- Positive scenarios:
+    - Get post by id
+    - Get list of posts
+    - Create, update and delete post
+- Negative scenarios:
+    - Request to invalid endpoint (404)
+    - Request with non-existing or invalid id (404)
+    - Request with incorrect content type
+- Contract testing:
+    - JSON schema validation for `GET /posts/{id}`
+
+**/comments**
+- Filtering using query parameters
+- Validation that all returned items match the filter condition
 
 Both positive and negative scenarios are covered.
-
-### /comments
-- GET comments filtered by query parameter (postId)
-- Validation that all returned items match the filter condition
 
 ---
 
 ## Project structure
 
-- src/test/java
-    - com/irina/practice
-        BaseApiTest.java
-        PostsApiTest.java
+src/test/java
+- com.irina.practice
+    - BaseApiTest.java
+    - PostsApiTest.java
 
-
+src/test/resources
+- config.properties
+- schemas
+    - post.json
+    
 ---
 
 ## How to run tests
