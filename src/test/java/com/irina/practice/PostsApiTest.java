@@ -1,7 +1,5 @@
 package com.irina.practice;
 
-import com.irina.practice.config.Config;
-import io.restassured.RestAssured;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +10,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 
-public class PostsApiTest extends BaseApiTest{
+public class PostsApiTest extends BaseApiTest {
 
     @Nested
     class PositiveTests {
@@ -54,6 +52,19 @@ public class PostsApiTest extends BaseApiTest{
                     .body("id", equalTo(1))
                     .body("title", notNullValue())
                     .body("body", notNullValue());
+        }
+
+        @Test
+        void getPosts_byUserId_returnsOnlyPostsForThisUser() {
+            given()
+                    .spec(requestSpec)
+                    .queryParam("userId", 1)
+                    .when()
+                    .get("/posts")
+                    .then()
+                    .statusCode(200)
+                    .body("size()", greaterThan(0))
+                    .body("userId", everyItem((equalTo(1))));
         }
 
         @Test
@@ -112,6 +123,22 @@ public class PostsApiTest extends BaseApiTest{
                     .statusCode(200)
                     .body(matchesJsonSchemaInClasspath("schemas/post.json"));
         }
+
+        @Test
+        void patchPost_updateTitle_returnsUpdatedTitle() {
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("title", "Patched title");
+
+            given()
+                    .spec(requestSpec)
+                    .body(requestBody)
+                    .when()
+                    .patch("/posts/1")
+                    .then()
+                    .statusCode(200)
+                    .body("id", equalTo(1))
+                    .body("title", equalTo("Patched title"));
+        }
     }
 
     @Nested
@@ -127,7 +154,7 @@ public class PostsApiTest extends BaseApiTest{
             given()
                     .log().all()
                     .header("Content-Type", "application/json")
-                    .header("body", "application/json")
+                    .header("Accept", "application/json")
                     .body(requestBody)
                     .when()
                     .post("/postssss")
@@ -141,9 +168,9 @@ public class PostsApiTest extends BaseApiTest{
             given()
                     .spec(requestSpec)
                     .pathParam("id", 999999)
-            .when()
+                    .when()
                     .get("/posts/{id}")
-            .then()
+                    .then()
                     .statusCode(404)
                     .body("$", anEmptyMap());
         }
@@ -153,9 +180,9 @@ public class PostsApiTest extends BaseApiTest{
             given()
                     .spec(requestSpec)
                     .pathParam("id", "abc")
-            .when()
+                    .when()
                     .get("/posts/{id}")
-            .then()
+                    .then()
                     .statusCode(404);
         }
 
@@ -164,9 +191,9 @@ public class PostsApiTest extends BaseApiTest{
             given()
                     .spec(requestSpec)
                     .queryParam("userId", 99999)
-            .when()
+                    .when()
                     .get("/posts")
-            .then()
+                    .then()
                     .statusCode(200)
                     .body("$", empty());
         }
@@ -176,9 +203,9 @@ public class PostsApiTest extends BaseApiTest{
             given()
                     .spec(requestSpec)
                     .body("{}")
-            .when()
+                    .when()
                     .post("/posts")
-            .then()
+                    .then()
                     .statusCode(201)
                     .body("id", notNullValue());
         }
@@ -189,9 +216,9 @@ public class PostsApiTest extends BaseApiTest{
                     .spec(requestSpec)
                     .header("Content-Type", "text/plain")
                     .body("hello")
-            .when()
+                    .when()
                     .post("/posts")
-            .then()
+                    .then()
                     .statusCode(anyOf(is(201), is(400), is(415)));
         }
 
@@ -199,9 +226,9 @@ public class PostsApiTest extends BaseApiTest{
         void getNonExistingComment_returns404() {
             given()
                     .spec(requestSpec)
-            .when()
+                    .when()
                     .post("/comments/999999")
-            .then()
+                    .then()
                     .statusCode(404);
         }
 
