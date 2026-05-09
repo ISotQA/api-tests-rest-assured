@@ -9,6 +9,7 @@ import java.util.Map;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class PostsApiTest extends BaseApiTest {
 
@@ -138,6 +139,33 @@ public class PostsApiTest extends BaseApiTest {
                     .statusCode(200)
                     .body("id", equalTo(1))
                     .body("title", equalTo("Patched title"));
+        }
+
+        @Test
+        void getPostById_responseContentTypeIsJson() {
+            given()
+                    .spec(requestSpec)
+                    .pathParam("id", 1)
+                    .when()
+                    .get("/posts/{id}")
+                    .then()
+                    .statusCode(200)
+                    .header("Content-Type", containsString("application/json"));
+        }
+
+        @Test
+        void getPostById_extractTitle() {
+            String title = given()
+                    .spec(requestSpec)
+                    .pathParam("id", 1)
+                    .when()
+                    .get("/posts/{id}")
+                    .then()
+                    .statusCode(200)
+                    .extract()
+                    .path("title");
+
+            assertNotNull(title);
         }
     }
 
