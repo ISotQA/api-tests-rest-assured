@@ -3,6 +3,7 @@ package com.irina.practice;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.hamcrest.Matchers.*;
 
 public class UsersApiTest extends BaseApiTest {
@@ -56,6 +57,33 @@ public class UsersApiTest extends BaseApiTest {
                 .then()
                 .statusCode(200)
                 .header("Content-Type", containsString("application/json"));
+    }
+
+    @Test
+    void getUserById_matchesSchema() {
+        given()
+                .spec(requestSpec)
+                .pathParam("id", 1)
+                .when()
+                .get("/users/{id}")
+                .then()
+                .statusCode(200)
+                .body(matchesJsonSchemaInClasspath("schemas/user.json"));
+    }
+
+    @Test
+    void getUserById_checkNestedFields() {
+        given()
+                .spec(requestSpec)
+                .pathParam("id", 1)
+                .when()
+                .get("/users/{id}")
+                .then()
+                .statusCode(200)
+                .body("address.city", equalTo("Gwenborough"),
+                        "company.name", equalTo("Romaguera-Crona"),
+                        "address.geo.lat", equalTo("-37.3159")
+                );
     }
 
 }
