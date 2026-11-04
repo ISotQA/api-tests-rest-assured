@@ -72,7 +72,7 @@ public class UsersApiTest extends BaseApiTest {
     }
 
     @Test
-    void getUserById_checkNestedFields() {
+    void getUserById_nestedFieldsMatchExpectedValues() {
         given()
                 .spec(requestSpec)
                 .pathParam("id", 1)
@@ -85,5 +85,18 @@ public class UsersApiTest extends BaseApiTest {
                         "address.geo.lat", equalTo("-37.3159")
                 );
     }
+
+    @Test
+    void getPostsByUserId_UserDoesNotExist_return200AndEmptyList() {
+        given()
+                .spec(requestSpec)
+                .pathParam("id", 500)
+                .when()
+                .get("/users/{id}/posts")
+                .then()
+                .statusCode(200)
+                .body("$", empty());
+    }
+
 
 }

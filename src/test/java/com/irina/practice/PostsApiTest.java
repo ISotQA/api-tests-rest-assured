@@ -1,7 +1,10 @@
 package com.irina.practice;
 
+import io.restassured.response.Response;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -260,5 +263,28 @@ public class PostsApiTest extends BaseApiTest {
                     .statusCode(404);
         }
 
+        @ParameterizedTest
+        @CsvSource({"1, 200",
+                "50, 200",
+                "100, 200",
+                "0, 404",
+                "-500, 404",
+                "101, 404",
+                "500, 404"})
+        void getPosts_checkDifferentId_return(int id, int expectedStatus) {
+            Response response = given()
+                    .spec(requestSpec)
+                    .pathParam("id", id)
+                    .when()
+                    .get("/posts/{id}");
+            response.then()
+                    .statusCode(expectedStatus);
+            if (expectedStatus == 200) {
+                response.then().body("id", equalTo(id));
+            } else {
+                response.then()
+                        .body("$", anEmptyMap());
+            }
+        }
     }
 }
