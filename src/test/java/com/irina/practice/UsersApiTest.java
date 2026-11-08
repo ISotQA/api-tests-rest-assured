@@ -6,7 +6,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.hamcrest.Matchers.*;
 
-public class UsersApiTest extends BaseApiTest {
+class UsersApiTest extends BaseApiTest {
 
     @Test
     void getUserById_returnsCorrectUser() {
@@ -87,7 +87,7 @@ public class UsersApiTest extends BaseApiTest {
     }
 
     @Test
-    void getPostsByUserId_UserDoesNotExist_return200AndEmptyList() {
+    void getPostsByUserId_userDoesNotExist_returns200AndEmptyList() {
         given()
                 .spec(requestSpec)
                 .pathParam("id", 500)

@@ -1,10 +1,9 @@
 package com.irina.practice;
 
-import io.restassured.response.Response;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +13,7 @@ import static org.hamcrest.Matchers.*;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class PostsApiTest extends BaseApiTest {
+class PostsApiTest extends BaseApiTest {
 
     @Nested
     class PositiveTests {
@@ -170,6 +169,41 @@ public class PostsApiTest extends BaseApiTest {
 
             assertNotNull(title);
         }
+
+        @ParameterizedTest
+        @ValueSource(ints = {1, 50, 100})
+        void getPostById_withValidId_returnsPostWithSameId(int id) {
+            given()
+                    .spec(requestSpec)
+                    .pathParam("id", id)
+                    .when()
+                    .get("/posts/{id}")
+                    .then()
+                    .statusCode(200)
+                    .body("id", equalTo(id));
+        }
+
+        @Test
+        void getPostAuthor_forExistingPost_returnsUserMatchingPostUserId() {
+            int userId = given()
+                    .spec(requestSpec)
+                    .pathParam("id", 37)
+                    .when()
+                    .get("/posts/{id}")
+                    .then()
+                    .statusCode(200)
+                    .extract()
+                    .path("userId");
+
+            given()
+                    .spec(requestSpec)
+                    .pathParam("userId", userId)
+                    .when()
+                    .get("/users/{userId}")
+                    .then()
+                    .statusCode(200)
+                    .body("id", equalTo(userId));
+        }
     }
 
     @Nested
@@ -192,18 +226,6 @@ public class PostsApiTest extends BaseApiTest {
                     .then()
                     .log().all()
                     .statusCode(404);
-        }
-
-        @Test
-        void getPost_whenIdDoesNotExist_returns404() {
-            given()
-                    .spec(requestSpec)
-                    .pathParam("id", 999999)
-                    .when()
-                    .get("/posts/{id}")
-                    .then()
-                    .statusCode(404)
-                    .body("$", anEmptyMap());
         }
 
         @Test
@@ -264,27 +286,16 @@ public class PostsApiTest extends BaseApiTest {
         }
 
         @ParameterizedTest
-        @CsvSource({"1, 200",
-                "50, 200",
-                "100, 200",
-                "0, 404",
-                "-500, 404",
-                "101, 404",
-                "500, 404"})
-        void getPosts_checkDifferentId_return(int id, int expectedStatus) {
-            Response response = given()
+        @ValueSource(ints = {-500, 0, 101, 500})
+        void getPostById_withInvalidId_returns404(int id) {
+            given()
                     .spec(requestSpec)
                     .pathParam("id", id)
                     .when()
-                    .get("/posts/{id}");
-            response.then()
-                    .statusCode(expectedStatus);
-            if (expectedStatus == 200) {
-                response.then().body("id", equalTo(id));
-            } else {
-                response.then()
-                        .body("$", anEmptyMap());
-            }
+                    .get("/posts/{id}")
+                    .then()
+                    .statusCode(404)
+                    .body("$", anEmptyMap());
         }
     }
 }
